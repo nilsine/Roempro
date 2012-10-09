@@ -1,6 +1,6 @@
-# Roempro
+# Roempro - Oempro Ruby Wrapper
 
-TODO: Write a gem description
+The purpose of this gem is to provide a way to handle the API of a given oempro application.
 
 ## Installation
 
@@ -18,7 +18,16 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Rails 3
+
+1. Set up the configuration (see config/initializers/roempro.rb)
+2. Use it in your code.
+
+### Ruby and others frameworks
+
+The informations can be submit to a new Roempro::Request object.
+
+	roempro = Roempro::Request.new :host => "localhost", :user => "Leeroy", :password => "nvmb3r5&ch4r4ct3r5"
 
 ## Contributing
 
