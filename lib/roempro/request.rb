@@ -75,8 +75,6 @@ module Roempro
 
     rescue ArgumentError => message
       puts message
-    ensure
-      return true if @session_id
     end
 
     private
