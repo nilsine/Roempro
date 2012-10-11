@@ -35,23 +35,35 @@ module Roempro
       login
 
       if not @query
-        raise "#{method_id.to_s} doesn't accept any arguments" if args.any?
+        if args.any?
+          raise ArgumentError, "#{method_id.to_s} doesn't accept any arguments"
+        end
+
         @query = { :command => [method_id.to_s.capitalize] }
         return self
       else
-        raise "#{self.class}##{method_id.to_s} only accept hash argument" unless args.empty? or
-                                                                                 args.first.kind_of? Hash
+        unless args.empty? or args.first.kind_of? Hash
+          raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
+        end
 
         @query[:command].push(method_id.to_s.capitalize)
         perform args.first
       end
+
+    rescue ArgumentError => message
+      @query = nil
+      puts message
     end
 
     private
 
       def perform(params={})
-        raise "Unable to perform the request : Uknown URL to Oempro" if not @url
-        raise "Unable to perform the request : params have to be a hash" if params.empty?
+        unless @url
+          raise ArgumentError, "Unable to perform the request : Uknown URL to Oempro"
+        end
+        if params.empty?
+          raise ArgumentError, "Unable to perform the request : params have to be a hash"
+        end
 
         @query[:command] = @query[:command].join(".")
         @query.merge!({ :responseformat => 'JSON' }).merge!(params.delete_if do |key|
@@ -68,8 +80,9 @@ module Roempro
       end
 
       def login
-      raise "You have to submit your username and password to log into Oempro" if not @user or
-                                                                                  not @password
+        unless @user and @password
+          raise ArgumentError, "You have to submit your username and password to log into Oempro"
+        end
 
         @query = { :command => ["User", "Login"] }
         perform :username => @user, :password => @password, :disablecaptcha => true
