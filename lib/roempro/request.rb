@@ -42,7 +42,6 @@ module Roempro
         end
 
         @query[:command].push(method_id.to_s.capitalize)
-
         perform args.first if login
       end
 
@@ -50,6 +49,10 @@ module Roempro
       @query = nil
       puts message
       return self
+    end
+
+    def last_response
+      @last_response
     end
 
     private
@@ -72,7 +75,7 @@ module Roempro
         uri.query = URI::encode_www_form @query
         @query = nil
 
-        Roempro::Response.new Net::HTTP.get_response(uri)
+        @last_response = Roempro::Response.new(Net::HTTP.get_response(uri))
       end
 
       def login
@@ -83,19 +86,20 @@ module Roempro
 
           last_query = @query
           @query = { :command => ["User", "Login"] }
-
-          response = perform :username => @user, :password => @password, :disablecaptcha => true
-
+          perform :username => @user, :password => @password, :disablecaptcha => true
           @query = last_query
 
-          # raise RuntimeError, response.error_text.join("\n") if not response.success
-          @session_id = response.session_id if response.http_success
+          unless @last_response.success
+            raise RuntimeError, @last_response.error_text.join("\n")
+          end
+
+          @session_id = @last_response.session_id
         end
 
       rescue ArgumentError => message
         puts message
       ensure
-        return @session_id
+        return true if @session_id
       end
   end
 end
