@@ -23,14 +23,10 @@ module Roempro
         raise ArgumentError, "#{method_id.to_s} doesn't accept any agument"
       end
 
-      return @response[method_id.to_s.split(/_/).join('')]
+      @response[method_id.to_s.split('_').join('')]
 
     rescue ArgumentError => message
       puts message
-    end
-
-    def success
-      @response['HttpSuccess']
     end
   end
 end
