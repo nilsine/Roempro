@@ -29,7 +29,7 @@ module Roempro
     end
 
     def success
-      @success
+      @response['HttpSuccess']
     end
   end
 end
