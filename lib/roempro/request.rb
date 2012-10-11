@@ -41,8 +41,9 @@ module Roempro
           raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
         end
 
+        login unless logged_in?
         @query[:command].push(method_id.to_s.capitalize)
-        perform args.first if login
+        perform args.first if logged_in?
       end
 
     rescue ArgumentError => message
@@ -55,8 +56,12 @@ module Roempro
       @last_response
     end
 
+    def logged_in?
+      @session_id ? true : false;
+    end
+
     def login
-      if not @session_id
+      unless logged_in?
         unless @user and @password
           raise ArgumentError, "You have to submit your username and password to log into Oempro"
         end
