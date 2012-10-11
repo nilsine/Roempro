@@ -74,9 +74,7 @@ module Roempro
         uri.query = URI::encode_www_form @query
         @query = nil
 
-        puts uri.to_s
-
-        # return Net::HTTP.get_response(uri)
+        return Roempro::Response.new Net::HTTP.get_response(uri)
       end
 
       def login
