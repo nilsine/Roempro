@@ -25,15 +25,10 @@ module Roempro
     ##
     # Provide a new Roempro::Request object
     def initialize(params={})
-      @url = params[:url]
-      @user = params[:username]
-      @password = params[:password]
+      @url , @user, @password = params[:url], params[:username], params[:password]
     end
 
     def method_missing(method_id, *args)
-
-      login
-
       if not @query
         if args.any?
           raise ArgumentError, "#{method_id.to_s} doesn't accept any arguments"
@@ -47,12 +42,14 @@ module Roempro
         end
 
         @query[:command].push(method_id.to_s.capitalize)
-        perform args.first
+
+        perform args.first if login
       end
 
     rescue ArgumentError => message
       @query = nil
       puts message
+      return self
     end
 
     private
@@ -61,29 +58,44 @@ module Roempro
         unless @url
           raise ArgumentError, "Unable to perform the request : Uknown URL to Oempro"
         end
-        if params.empty?
+        unless params.nil? or params.kind_of? Hash
           raise ArgumentError, "Unable to perform the request : params have to be a hash"
         end
 
         @query[:command] = @query[:command].join(".")
-        @query.merge!({ :responseformat => 'JSON' }).merge!(params.delete_if do |key|
+        @query.merge!({ :sessionid => @session_id }).merge!({ :responseformat => 'JSON' })
+        @query.merge!(params.delete_if do |key|
           %W(command responseformat).include? key.to_s
-        end)
+        end) unless params.nil?
 
         uri = URI(@url)
         uri.query = URI::encode_www_form @query
         @query = nil
 
-        return Roempro::Response.new Net::HTTP.get_response(uri)
+        Roempro::Response.new Net::HTTP.get_response(uri)
       end
 
       def login
-        unless @user and @password
-          raise ArgumentError, "You have to submit your username and password to log into Oempro"
+        if not @session_id
+          unless @user and @password
+            raise ArgumentError, "You have to submit your username and password to log into Oempro"
+          end
+
+          last_query = @query
+          @query = { :command => ["User", "Login"] }
+
+          response = perform :username => @user, :password => @password, :disablecaptcha => true
+
+          @query = last_query
+
+          # raise RuntimeError, response.error_text.join("\n") if not response.success
+          @session_id = response.session_id if response.http_success
         end
 
-        @query = { :command => ["User", "Login"] }
-        perform :username => @user, :password => @password, :disablecaptcha => true
+      rescue ArgumentError => message
+        puts message
+      ensure
+        return @session_id
       end
   end
 end
