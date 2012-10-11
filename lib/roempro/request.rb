@@ -55,6 +55,30 @@ module Roempro
       @last_response
     end
 
+    def login
+      if not @session_id
+        unless @user and @password
+          raise ArgumentError, "You have to submit your username and password to log into Oempro"
+        end
+
+        last_query = @query
+        @query = { :command => ["User", "Login"] }
+        perform :username => @user, :password => @password, :disablecaptcha => true
+        @query = last_query
+
+        unless @last_response.success
+          raise RuntimeError, @last_response.error_text.join("\n")
+        end
+
+        @session_id = @last_response.session_id
+      end
+
+    rescue ArgumentError => message
+      puts message
+    ensure
+      return true if @session_id
+    end
+
     private
 
       def perform(params={})
@@ -76,30 +100,6 @@ module Roempro
         @query = nil
 
         @last_response = Roempro::Response.new(Net::HTTP.get_response(uri))
-      end
-
-      def login
-        if not @session_id
-          unless @user and @password
-            raise ArgumentError, "You have to submit your username and password to log into Oempro"
-          end
-
-          last_query = @query
-          @query = { :command => ["User", "Login"] }
-          perform :username => @user, :password => @password, :disablecaptcha => true
-          @query = last_query
-
-          unless @last_response.success
-            raise RuntimeError, @last_response.error_text.join("\n")
-          end
-
-          @session_id = @last_response.session_id
-        end
-
-      rescue ArgumentError => message
-        puts message
-      ensure
-        return true if @session_id
       end
   end
 end
