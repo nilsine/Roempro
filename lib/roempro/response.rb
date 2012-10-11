@@ -12,6 +12,7 @@ module Roempro
 
       @response = JSON.parse(http_response.body)
       @response['HttpSuccess'] = http_response.is_a? Net::HTTPSuccess
+      @response = Hash[@response.map { |k,v| [k.downcase, v] }]
 
     rescue ArgumentError => message
       puts message
@@ -22,7 +23,7 @@ module Roempro
         raise ArgumentError, "#{method_id.to_s} doesn't accept any agument"
       end
 
-      return @response[method_id.to_s.split(/_/).map!(&:capitalize).join('')]
+      return @response[method_id.to_s.split(/_/).join('')]
 
     rescue ArgumentError => message
       puts message
