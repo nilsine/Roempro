@@ -1,0 +1,14 @@
+test:
+  url: PATH_TO_OEMPRO
+  username: USER
+  password: PASSWORD
+
+development:
+  url: PATH_TO_OEMPRO
+  username: USER
+  password: PASSWORD
+
+production:
+  url: PATH_TO_OEMPRO
+  username: USER
+  password: PASSWORD
