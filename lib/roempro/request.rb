@@ -29,27 +29,18 @@ module Roempro
     end
 
     def method_missing(method_id, *args)
-      if not @query
-        if args.any?
-          raise ArgumentError, "#{method_id.to_s} doesn't accept any arguments"
-        end
+      unless args.empty? or args.first.kind_of? Hash
+        raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
+      end
 
-        @query = { :command => [method_id.to_s.capitalize] }
-        return self
-      else
-        unless args.empty? or args.first.kind_of? Hash
-          raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
-        end
+      login unless logged_in?
 
-        login unless logged_in?
-        @query[:command].push(method_id.to_s.capitalize)
-        perform args.first if logged_in?
+      if logged_in?
+        perform (args.first || {}).merge :command => method_id.to_s.split('_').map(&:capitalize).reverse.join('.')
       end
 
     rescue ArgumentError => message
-      @query = nil
       puts message
-      return self
     end
 
     def last_response
@@ -66,10 +57,10 @@ module Roempro
           raise ArgumentError, "You have to submit your username and password to log into Oempro"
         end
 
-        last_query = @query
-        @query = { :command => ["User", "Login"] }
-        perform :username => @user, :password => @password, :disablecaptcha => true
-        @query = last_query
+        perform :command => "User.Login",
+                :username => @user,
+                :password => @password,
+                :disablecaptcha => true
 
         unless @last_response.success
           raise RuntimeError, @last_response.error_text.join("\n")
@@ -84,23 +75,19 @@ module Roempro
 
     private
 
-      def perform(params={})
+      def perform(query={})
         unless @url
           raise ArgumentError, "Unable to perform the request : Uknown URL to Oempro"
         end
-        unless params.nil? or params.kind_of? Hash
+        unless query.nil? or query.kind_of? Hash
           raise ArgumentError, "Unable to perform the request : params have to be a hash"
         end
 
-        @query[:command] = @query[:command].join(".")
-        @query.merge!({ :sessionid => @session_id }).merge!({ :responseformat => 'JSON' })
-        @query.merge!(params.delete_if do |key|
-          %W(command responseformat).include? key.to_s
-        end) unless params.nil?
+        query ||= {}
+        query.merge! :sessionid => @session_id, :responseformat => 'JSON'
 
         uri = URI(@url)
-        uri.query = URI::encode_www_form @query
-        @query = nil
+        uri.query = URI::encode_www_form query
 
         @last_response = Roempro::Response.new(Net::HTTP.get_response(uri))
       end
