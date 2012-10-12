@@ -7,7 +7,7 @@ module Roempro
   class Response
     def initialize(http_response)
       unless http_response.kind_of? Net::HTTPResponse
-        raise ArgumentError, "#{self.class} only support Net::HTTPResponse as input"
+        raise ArgumentError, "#{self.class}#new only support Net::HTTPResponse as input"
       end
 
       @response = JSON.parse(http_response.body)
@@ -20,7 +20,7 @@ module Roempro
 
     def method_missing(method_id, *args)
       if args.any?
-        raise ArgumentError, "#{method_id.to_s} doesn't accept any agument"
+        raise ArgumentError, "#{self.class}##{method_id.to_s} doesn't accept any agument"
       end
 
       @response[method_id.to_s.split('_').join('')]
