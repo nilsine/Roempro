@@ -28,16 +28,27 @@ module Roempro
       @url , @user, @password = params[:url], params[:username], params[:password]
     end
 
-    def method_missing(method_id, *args)
-      unless args.empty? or args.first.kind_of? Hash
-        raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
+    def command(command_name, *args)
+      unless args.flatten.compact.empty? or args.flatten.first.kind_of? Hash
+        raise ArgumentError, "#{self.class}##{command_name.to_s} only accept hash argument"
       end
 
       login unless logged_in?
 
       if logged_in?
-        perform (args.first || {}).merge :command => method_id.to_s.split('_').map(&:capitalize).reverse.join('.')
+        perform (args.flatten.first || {}).merge :command => command_name
       end
+
+    rescue ArgumentError => message
+      puts message
+    end
+
+    def method_missing(method_id, *args)
+      unless args.empty? or args.first.kind_of? Hash
+        raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
+      end
+
+      command(method_id.to_s.split('_').map(&:capitalize).reverse.join('.'), args)
 
     rescue ArgumentError => message
       puts message
