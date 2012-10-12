@@ -16,6 +16,9 @@ module Roempro
 
     rescue ArgumentError => message
       puts message
+    rescue JSON::ParserError
+      # Report the exception message ?
+      puts "JSON parser fail to compute the API's response"
     end
 
     def method_missing(method_id, *args)
