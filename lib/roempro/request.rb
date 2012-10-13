@@ -25,7 +25,11 @@ module Roempro
     ##
     # Provide a new Roempro::Request object
     def initialize(params={})
-      @url , @user, @password = params[:url], params[:username], params[:password]
+      @url, @user, @password = Config.url, Config.username, Config.password
+
+      @url      = params[:url]      if params[:url].is_a?       String
+      @user     = params[:username] if params[:username].is_a?  String
+      @password = params[:password] if params[:password].is_a?  String
     end
 
     def command(command_name, *args)
