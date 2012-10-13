@@ -25,13 +25,27 @@ module Roempro
     ##
     # Provide a new Roempro::Request object
     def initialize(params={})
-      @url      = params[:url]      if params[:url].is_a?       String
-      @username = params[:username] if params[:username].is_a?  String
-      @password = params[:password] if params[:password].is_a?  String
+
+      @username = params[:username].to_s if params[:username]
+      @password = params[:password].to_s if params[:password]
+      @@url = if params[:url]
+        if uri = URI.parse(params[:url]) and
+           uri.instance_of? URI::HTTPS
+            raise ArgumentError, "Roempro::Request doesn't support SSL yet"
+        end
+        if uri.instance_of? URI::Generic
+          "http://" + params[:url].to_s
+        elsif uri.kind_of?  URI::HTTP
+          params[:url].to_s
+        end
+      end
 
       if @url or @username or @password
         @session_id = nil
       end
+
+    rescue URI::Error, ArgumentError => message
+      puts message
     end
 
     def command(command_name, *args)
