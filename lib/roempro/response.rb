@@ -4,7 +4,7 @@ require 'net/http'
 require 'json'
 
 module Roempro
-  class Response
+  class Response < Roempro::Class
     def initialize(http_response)
       unless http_response.kind_of? Net::HTTPResponse
         raise ArgumentError, "#{self.class}#new only support Net::HTTPResponse as input"

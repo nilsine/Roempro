@@ -20,7 +20,7 @@ module Roempro
   #
   # Then, `req.emails.get` return Roempro::Response object.
   # See Roempro::Response to learn more.
-  class Request
+  class Request < Roempro::Class
 
     ##
     # Provide a new Roempro::Request object
