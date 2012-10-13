@@ -25,10 +25,10 @@ module Roempro
     ##
     # Provide a new Roempro::Request object
     def initialize(params={})
-      @url, @user, @password = Config.url, Config.username, Config.password
+      @url, @username, @password = Config.url, Config.username, Config.password
 
       @url      = params[:url]      if params[:url].is_a?       String
-      @user     = params[:username] if params[:username].is_a?  String
+      @username = params[:username] if params[:username].is_a?  String
       @password = params[:password] if params[:password].is_a?  String
     end
 
@@ -68,12 +68,12 @@ module Roempro
 
     def login
       unless logged_in?
-        unless @user and @password
+        unless @username and @password
           raise ArgumentError, "You have to submit your username and password to log into Oempro"
         end
 
         perform :command => "User.Login",
-                :username => @user,
+                :username => @username,
                 :password => @password,
                 :disablecaptcha => true
 
