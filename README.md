@@ -1,8 +1,10 @@
 # Roempro - Oempro Ruby Wrapper
 
-The purpose of this gem is to provide a way to handle the API of a given oempro application.
+It aims to easily deal with the API of a given Oempro application.
 
 ## Installation
+
+### Using Gemfile
 
 Add this line to your application's Gemfile:
 
@@ -12,7 +14,9 @@ And then execute:
 
     $ bundle install
 
-Or install it yourself as:
+### By hand
+
+Install it yourself as:
 
     $ gem install roempro
 
@@ -20,8 +24,18 @@ Or install it yourself as:
 
 ### Rails 3
 
-1. Set up the configuration in *config/roempro.yml*
-2. Use it in your code.
+After installing the gem, run the rails generator to populate the `config` and `config/initializers` directories
+
+    $ rails g roempro:install
+
+Set up the configuration in `config/roempro.yml`
+
+    production:
+        url:      path_to_oempro_api
+        username: oempro_user
+        password: oempro_password
+
+This will set up a default configuration use by Roempro.
 
 **Don't forget to restrict the permitions on the file.**
 
@@ -29,14 +43,20 @@ Or install it yourself as:
 
 ### Ruby and others frameworks
 
-The informations can be submit to a new Roempro::Request object.
+The default configuration can also be set using Roempro::Config object, as
 
-	roempro = Roempro::Request.new :host => "localhost", :user => "Leeroy", :password => "nvmb3r5&ch4r4ct3r5"
+    irb > Roempro::Config.load_from_hash :url => "path_to_oempro",
+                                         :username => "oempro_user",
+                                         :password => "oempro_password"
 
-## Contributing
+### All cases
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+The configuration can be set dynamicly, using the Roempro::Request constructor. *Useless if you set up Roempro::Config*
+
+    request = Roempro::Request.new :url => "path_to_oempro", :username => "oempro_user", :password => "oempro_password"
+
+Then, actually perform the request. For instance, retrieve all campaigns
+
+    request.get_campaigns
+
+**See the documentation for an advanced usage.**

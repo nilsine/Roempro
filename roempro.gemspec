@@ -10,8 +10,8 @@ Gem::Specification.new do |gem|
   gem.version       = Roempro::VERSION
   gem.authors       = ["Révillon Loïk"]
   gem.email         = ["contact@revillon.dyndns.org"]
-  gem.description   = 'Deal with a given Oempro application API. Handle about subscribers, campaigns and emails'
-  gem.summary       = 'Ruby wrapper for Oempro API'
+  gem.description   = "Deal with a given Oempro application API. Handle about subscribers, campaigns and emails"
+  gem.summary       = "Ruby wrapper for Oempro API"
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
