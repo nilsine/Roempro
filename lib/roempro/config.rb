@@ -4,9 +4,23 @@ module Roempro
   class Config < Roempro::Class
     cattr_reader :url, :username, :password
 
+    ##
+    # Load the default configuration into Roempro::Config.
+    #
+    # Once the default configuration loaded into this object, all new
+    # Roempro's components will use those informations to configure
+    # themself. Unless a specific configuration is provide at creation.
+    #
+    # === Parameters
+    # [Hash]
+    #   [:url]
+    #     Define the path to the desired Oempro API
+    #   [:username]
+    #     The username to use for login
+    #   [:password]
+    #     The user's password
     def self.load_from_hash(params={})
       params = Hash[params.map {|k,v| [k.to_sym,v] }]
-
 
       @@username = params[:username].to_s if params[:username]
       @@password = params[:password].to_s if params[:password]

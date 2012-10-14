@@ -1,8 +1,8 @@
-# Roempro - Oempro Ruby Wrapper
+= Roempro - Oempro Ruby Wrapper
 
 The purpose of this gem is to provide a way to handle the API of a given oempro application.
 
-## Installation
+== Installation
 
 Add this line to your application's Gemfile:
 
@@ -16,24 +16,24 @@ Or install it yourself as:
 
     $ gem install roempro
 
-## Usage
+== Usage
 
-### Rails 3
+=== Rails 3
 
-1. Set up the configuration in *config/roempro.yml*
+1. Set up the configuration in <i>config/roempro.yml</i>
 2. Use it in your code.
 
-**Don't forget to restrict the permitions on the file.**
+<b>Don't forget to restrict the permitions on the file.</b>
 
     $ chmod 600 config/roempro.yml
 
-### Ruby and others frameworks
+=== Ruby and others frameworks
 
 The informations can be submit to a new Roempro::Request object.
 
-	roempro = Roempro::Request.new :host => "localhost", :user => "Leeroy", :password => "nvmb3r5&ch4r4ct3r5"
+    roempro = Roempro::Request.new :host => "localhost", :user => "Leeroy", :password => "nvmb3r5&ch4r4ct3r5"
 
-## Contributing
+== Contributing
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)

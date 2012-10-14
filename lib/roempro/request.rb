@@ -5,27 +5,34 @@ require "uri"
 
 module Roempro
   ##
-  # This specific class is responsible to actually perform
-  # the request to the given Oempro API.
+  # Entity which actually perform the request to the given Oempro API.
   #
-  # It give a way to merely deal with the API handling all
-  # the undestood commands. Actually, it build the request
-  # chain from the methods names and the hash submit as argument.
+  # It give a way to merely deal with the API handling all the undestood
+  # commands. Actually, it build the request chain from the methods names and
+  # the hash submited as argument.
   #
   # For instance, to fetch all emails :
   #
   #   req = Roempro::Request.new
-  #   # => <#Roempro::Request>
-  #   req.emails.get    # It does the trick
-  #
-  # Then, `req.emails.get` return Roempro::Response object.
-  # See Roempro::Response to learn more.
+  #   # => #<Roempro::Request>
+  #   req.get_emails    # Will actually retrieve all emails.
   class Request < Roempro::Class
 
     ##
-    # Provide a new Roempro::Request object
+    # Return a new Roempro::Request object
+    #
+    # Paramters are optionals. Those which are missing will
+    # be got from Roempro::Config.
+    #
+    # === Parameters
+    # [Hash]
+    #   [:url]
+    #     Define the path to the desired Oempro API
+    #   [:username]
+    #     The username to use for login
+    #   [:password]
+    #     The user's password
     def initialize(params={})
-
       @username = params[:username].to_s if params[:username]
       @password = params[:password].to_s if params[:password]
       @@url = if params[:url]
@@ -48,6 +55,19 @@ module Roempro
       puts message
     end
 
+    ##
+    # Fallback to request a command to the Oempro API.
+    #
+    # For the most commands, just call them using the <i>method *to*
+    # command</i> pattern (see method_missing) should work fine. Nevertheless, few command in the
+    # Oempro API just cannot be send by this way, because of how
+    # Roempro::Request compute a called method to a proper command name.
+    #
+    # === Parameters
+    # [String]
+    #   The command name, as defined in the Oempro API documentation.
+    # [Hash]
+    #   Parameters to submit with the command.
     def command(command_name, *args)
       unless args.flatten.compact.empty? or args.flatten.first.kind_of? Hash
         raise ArgumentError, "#{self.class}##{command_name.to_s} only accept hash argument"
@@ -63,6 +83,19 @@ module Roempro
       puts message
     end
 
+    ##
+    # Provide to the Object's user a flexible way to command to the Oempro API.
+    #
+    # It work with the following pattern :
+    #
+    #   Romepro::Request#given_command
+    #   # Use "Command.Given" as command to send to the Oempro API
+    #
+    # === Examples
+    #
+    #   > req = Roempro::Request.new
+    #     => #<Roempro::Request>
+    #   > req.get_emails    # GET [...]api.php?command=Emails.Get[...]
     def method_missing(method_id, *args)
       unless args.empty? or args.first.kind_of? Hash
         raise ArgumentError, "#{self.class}##{method_id.to_s} only accept hash argument"
@@ -74,10 +107,23 @@ module Roempro
       puts message
     end
 
+    ##
+    # Return the last response answered by the Oempro API
+    #
+    # === Return
+    # Roempro::Response
     def last_response
       @last_response
     end
 
+    ##
+    # Tell if Roempro is currently logged in the Oempro API.
+    #
+    # If the current object has been created with a specific url, username or
+    # password else than the default configuration, then, it check the
+    # <i>session id</i> stored within this Roempro::Request object.
+    #
+    # Else, it look for <i>session id</i> kept into Roempro::Base.
     def logged_in?
       if defined? @session_id
         @session_id ? true : false;
@@ -86,6 +132,14 @@ module Roempro
       end
     end
 
+    ##
+    # Log into the Oempro API
+    #
+    # If the given url, username or password are different from the default
+    # ones, then it use them and the returned <i>session id</i> is stored
+    # within this Roempro::Request object.
+    #
+    # Else, the <i>session id</i> is kept into Roempro::Base
     def login
       unless logged_in?
         unless (@username and @password) or (Config.username and Config.password)
@@ -114,6 +168,18 @@ module Roempro
 
     private
 
+      ##
+      # Perform a request to the Oempro API.
+      #
+      # It look for specific url, username or password and use it. Else, it
+      # look for the default configuration.
+      #
+      # === Parameters
+      # [Hash]
+      #   Parameters to submit with the command
+      #
+      # === Return
+      # Roempro::Response
       def perform(query={})
         unless @url or Config.url
           raise ArgumentError, "Unable to perform the request : Uknown URL to Oempro"
