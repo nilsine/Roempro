@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 # -*- encoding: utf-8 -*-
 
 lib = File.expand_path('../lib', __FILE__)
@@ -8,8 +10,8 @@ require 'roempro/version'
 Gem::Specification.new do |gem|
   gem.name          = "roempro"
   gem.version       = Roempro::VERSION
-  gem.authors       = ["Révillon Loïk"]
-  gem.email         = ["contact@revillon.dyndns.org"]
+  gem.authors       = ["Nilsine, Loïk Révillon, Jean-philippe Lannoy"]
+  gem.email         = ["contact@revillon.dyndns.org, jp.lannoy@nilsine.fr"]
   gem.description   = "Deal with a given Oempro application API. Handle about subscribers, campaigns and emails"
   gem.summary       = "Ruby wrapper for Oempro API"
   gem.homepage      = ""
