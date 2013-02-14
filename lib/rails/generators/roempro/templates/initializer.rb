@@ -1,5 +1,3 @@
-# -*- encoding : UTF-8 -*-
-
 require 'yaml'
 
 # Retrieve the values from config/roempro.yml

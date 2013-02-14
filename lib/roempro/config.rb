@@ -1,5 +1,3 @@
-# -*- encoding : UTF-8 -*-
-
 module Roempro
   class Config < Roempro::Class
     cattr_reader :url, :username, :password

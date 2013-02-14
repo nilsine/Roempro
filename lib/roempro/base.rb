@@ -1,5 +1,3 @@
-# -*- encoding : UTF-8 -*-
-
 ##
 # Roempro, a shortcut for Ruby Oempro, is a Ruby wrapper for the Oempro API,
 # which provide a way to deal with the API easily.

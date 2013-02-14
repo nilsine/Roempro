@@ -1,5 +1,3 @@
-# -*- encoding : UTF-8 -*-
-
 module Roempro
   module Generators
     class InstallGenerator < Rails::Generators::Base
