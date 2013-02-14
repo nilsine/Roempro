@@ -49,6 +49,8 @@ module Roempro
         @session_id = nil
       end
 
+      hide :password
+
     rescue URI::Error, ArgumentError => message
       puts message
     end
