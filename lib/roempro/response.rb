@@ -32,6 +32,8 @@ module Roempro
     rescue JSON::ParserError
       # Report the exception message ?
       puts "JSON parser fail to compute the API's response"
+    ensure
+      @response ||= []
     end
 
     ##
