@@ -35,7 +35,7 @@ module Roempro
     def initialize(params={})
       @username = params[:username].to_s if params[:username]
       @password = params[:password].to_s if params[:password]
-      @@url = if params[:url]
+      @url = if params[:url]
         if uri = URI.parse(params[:url]) and
            uri.instance_of? URI::HTTPS
             raise ArgumentError, "Roempro::Request doesn't support SSL yet"
