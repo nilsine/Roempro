@@ -17,6 +17,11 @@ module Roempro
   class Request < Roempro::Class
 
     ##
+    # How many times a request can retry before abord it
+    #
+    MaxRetry = 3
+
+    ##
     # Return a new Roempro::Request object
     #
     # Paramters are optionals. Those which are missing will
@@ -27,7 +32,7 @@ module Roempro
     #   [:url]
     #     Define the path to the desired Oempro API
     #   [:username]
-    #     The username to use for login
+    #     The username to use for signin
     #   [:password]
     #     The user's password
     def initialize(params={})
@@ -73,12 +78,15 @@ module Roempro
         raise ArgumentError, "#{self.class}##{command_name.to_s} only accept hash argument"
       end
 
-      login unless logged_in?
+      # Perform the same request until it success or Roempro cannot sign in
+      # or the max retry has been reached
+      begin
+        may_signin
+        perform((args.flatten.first || {}).merge :command => command_name)
+      end while @retry and @retry < MaxRetry
 
-      if logged_in?
-        perform (args.flatten.first || {}).merge :command => command_name
-      end
-
+      quit
+      last_response
     rescue ArgumentError => message
       puts message
     end
@@ -117,33 +125,34 @@ module Roempro
     end
 
     ##
-    # Tell if Roempro is currently logged in the Oempro API.
+    # Tell if Roempro signed in the Oempro API.
     #
     # If the current object has been created with a specific url, username or
     # password else than the default configuration, then, it check the
     # <i>session id</i> stored within this Roempro::Request object.
     #
     # Else, it look for <i>session id</i> kept into Roempro::Base.
-    def logged_in?
-      if defined? @session_id
-        @session_id ? true : false;
-      else
-        Base.session_id ? true : false;
-      end
+    def signed_in?
+      # Force sign in again if defined
+      @resignin, @session_id, Base.session_id = nil if @resignin
+
+      is_signed_in = (@session_id || Base.session_id) ? true : false
+      @resignin = nil if is_signed_in
+      is_signed_in
     end
 
     ##
-    # Log into the Oempro API
+    # Sign in the Oempro API
     #
     # If the given url, username or password are different from the default
     # ones, then it use them and the returned <i>session id</i> is stored
     # within this Roempro::Request object.
     #
     # Else, the <i>session id</i> is kept into Roempro::Base
-    def login
-      unless logged_in?
+    def may_signin
+      unless signed_in?
         unless (@username and @password) or (Config.username and Config.password)
-          raise ArgumentError, "You have to submit your username and password to log into Oempro"
+          raise ArgumentError, "You have to submit your username and password to sign in Oempro"
         end
 
         perform :command => "User.Login",
@@ -157,8 +166,10 @@ module Roempro
 
         if defined? @session_id
           @session_id = @last_response.session_id
+          signed_in?
         else
           Base.session_id = @last_response.session_id
+          signed_in?
         end
       end
 
@@ -193,6 +204,20 @@ module Roempro
 
         uri = URI(@url || Config.url)
         @last_response = Roempro::Response.new(Net::HTTP.post_form(uri, query))
+
+        if @last_response.errorcode == 99998 # session timeouted
+          @resignin = true
+          @retry = @retry.to_i + 1 if query[:command] != 'User.Login'
+        else
+          @resignin = nil
+        end
+      end
+
+      ##
+      # Clean up few instance variables used to define if the request have to
+      # be performed again. Call this method main the Request is over.
+      def quit
+        @retry, @resignin = nil
       end
   end
 end
