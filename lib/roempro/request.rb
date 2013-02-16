@@ -192,9 +192,7 @@ module Roempro
         query.merge! :sessionid => @session_id || Base.session_id, :responseformat => 'JSON'
 
         uri = URI(@url || Config.url)
-        uri.query = URI::encode_www_form query
-
-        @last_response = Roempro::Response.new(Net::HTTP.get_response(uri))
+        @last_response = Roempro::Response.new(Net::HTTP.post_form(uri, query))
       end
   end
 end
